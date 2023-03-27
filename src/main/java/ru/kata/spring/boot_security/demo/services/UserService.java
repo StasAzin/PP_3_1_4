@@ -9,7 +9,7 @@ import ru.kata.spring.boot_security.demo.models.User;
 import java.util.List;
 
 public interface UserService extends UserDetailsService {
-    boolean addUser(User user);
+    void addUser(User user);
 
     void updateUser(Long id, User user);
 

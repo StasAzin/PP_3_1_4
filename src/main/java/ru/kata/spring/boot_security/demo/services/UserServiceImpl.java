@@ -12,6 +12,7 @@ import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -30,15 +31,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean addUser(User user) {
-        User userFromDB = userRepository.getByEmail(user.getUsername());
-        if (userFromDB != null) {
-            return false;
-        }
+    public User findByUsername(String email) {
+        return userRepository.getByEmail(email).get();
+    }
 
+    @Override
+    public List<User> getUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public void addUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
-        return true;
     }
 
     @Override
@@ -54,27 +59,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUsername(String email) {
-        return userRepository.getByEmail(email);
-    }
-
-    @Override
-    public List<User> getUsers() {
-        return userRepository.findAll();
-    }
-
-
-    @Override
     public List<Role> getRoles() {
         return roleRepository.findAll();
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.getByEmail(username);
-        if (user == null) {
-            throw new UsernameNotFoundException(String.format("User '%s' not found", username));
-        }
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
+        User user = userRepository.getByEmail(email).orElse(null);
+
+        if (user == null)
+            throw new UsernameNotFoundException("User not found");
 
         return user;
     }
